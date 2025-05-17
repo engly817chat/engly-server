@@ -4,7 +4,7 @@ import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.EmailSendInfo;
 import com.engly.engly_server.models.entity.VerifyToken;
 import com.engly.engly_server.models.enums.TokenType;
-import com.engly.engly_server.repo.VerifyTokenRepo;
+import com.engly.engly_server.repository.VerifyTokenRepository;
 import com.engly.engly_server.service.common.EmailService;
 import com.engly.engly_server.service.common.impl.EmailMessageGenerator;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import java.util.function.Predicate;
 @Slf4j
 public record EmailSenderUtil(
         String email,
-        VerifyTokenRepo tokenRepo,
+        VerifyTokenRepository tokenRepo,
         EmailMessageGenerator messageGenerator,
         EmailService emailService,
         Resource messageTemplate,

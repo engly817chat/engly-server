@@ -4,6 +4,7 @@ import com.engly.engly_server.models.dto.UsersDto;
 import com.engly.engly_server.service.common.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -31,8 +32,8 @@ public class UserController {
             @ParameterObject @PageableDefault(sort = "username,asc") Pageable pageable,
             PagedResourcesAssembler<UsersDto> assembler
     ) {
-        final var users = userService.allUsers(pageable);
-        return ResponseEntity.ok(assembler.toModel(users));
+        final var users = userService.allUsers();
+        return ResponseEntity.ok(assembler.toModel(new PageImpl<>(users, pageable, users.size())));
     }
 
     @DeleteMapping("/{id}")

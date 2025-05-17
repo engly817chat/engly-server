@@ -2,9 +2,11 @@ package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.CategoriesDto;
 import com.engly.engly_server.service.common.CategoriesService;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -36,11 +38,12 @@ public class PublicController {
             }
     )
     @GetMapping("/get-all-categories")
+    @RateLimiter(name = "PublicController")
     public ResponseEntity<PagedModel<EntityModel<CategoriesDto>>> getAll(
             @ParameterObject @PageableDefault(size = 8, sort = "name,asc")
             Pageable pageable,
             PagedResourcesAssembler<CategoriesDto> assembler) {
-        var allCategories = categoriesService.getAllCategories(pageable);
-        return ResponseEntity.ok(assembler.toModel(allCategories));
+        final var allCategories = categoriesService.getAllCategories();
+        return ResponseEntity.ok(assembler.toModel(new PageImpl<>(allCategories, pageable, allCategories.size())));
     }
 }

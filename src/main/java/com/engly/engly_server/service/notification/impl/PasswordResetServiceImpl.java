@@ -6,8 +6,8 @@ import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.dto.EmailSendInfo;
 import com.engly.engly_server.models.dto.update.PasswordResetRequest;
 import com.engly.engly_server.models.enums.TokenType;
-import com.engly.engly_server.repo.UserRepo;
-import com.engly.engly_server.repo.VerifyTokenRepo;
+import com.engly.engly_server.repository.UserRepository;
+import com.engly.engly_server.repository.VerifyTokenRepository;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
 import com.engly.engly_server.service.common.EmailService;
 import com.engly.engly_server.service.common.impl.EmailMessageGenerator;
@@ -27,10 +27,10 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 public class PasswordResetServiceImpl implements PasswordResetService {
-    private final VerifyTokenRepo tokenRepo;
+    private final VerifyTokenRepository tokenRepo;
     private final EmailService emailService;
     private final EmailMessageGenerator messageGenerator;
-    private final UserRepo userRepo;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtAuthenticationService jwtAuthenticationService;
 
@@ -52,7 +52,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
                     emailService,
                     messageTemplate,
                     urlTemplate,
-                    "PasswordResetServiceImpl:sendMessage").sendTokenEmail(userRepo::existsByEmail, TokenType.PASSWORD_RESET);
+                    "PasswordResetServiceImpl:sendMessage").sendTokenEmail(userRepository::existsByEmail, TokenType.PASSWORD_RESET);
         } catch (Exception e) {
             log.error("[PasswordResetServiceImpl:sendMessage]Errors in user:{}", e.getMessage());
             throw new TokenNotFoundException("token not saved exception email %s".formatted(email));
@@ -66,7 +66,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
             if (!verifyToken.getTokenType().equals(TokenType.PASSWORD_RESET))
                 throw new TokenNotFoundException("Invalid token for password reset");
 
-            return userRepo.findByEmail(verifyToken.getEmail()).map(user -> {
+            return userRepository.findByEmail(verifyToken.getEmail()).map(user -> {
                 user.setPassword(passwordEncoder.encode(data.newPassword()));
                 if (Boolean.FALSE.equals(user.getEmailVerified())) {
                     user.setEmailVerified(true);

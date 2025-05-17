@@ -3,7 +3,7 @@ package com.engly.engly_server.security.registration;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Provider;
 import com.engly.engly_server.models.dto.create.SignUpRequestDto;
-import com.engly.engly_server.repo.UserRepo;
+import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.utils.passwordgenerateutil.PasswordGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import java.time.Instant;
 @Slf4j
 @RequiredArgsConstructor
 public final class GoogleRegistration implements RegistrationChooser {
-    private final UserRepo userRepo;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${dev.email}")
@@ -28,7 +28,7 @@ public final class GoogleRegistration implements RegistrationChooser {
     @Override
     public Users registration(SignUpRequestDto signUpRequestDto) {
         log.info("Registering Google user with email: {}", signUpRequestDto.email());
-        userRepo.findByEmail(signUpRequestDto.email()).ifPresent(users -> {
+        userRepository.findByEmail(signUpRequestDto.email()).ifPresent(users -> {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User with this Google email already exists");
         });
 
@@ -53,7 +53,7 @@ public final class GoogleRegistration implements RegistrationChooser {
                 .providerId(signUpRequestDto.providerId())
                 .build();
 
-        return userRepo.save(user);
+        return userRepository.save(user);
     }
 
     @Override

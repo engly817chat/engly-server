@@ -3,7 +3,7 @@ package com.engly.engly_server.security.jwt.service.impl;
 import com.engly.engly_server.models.dto.create.SignInDto;
 import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.entity.Users;
-import com.engly.engly_server.repo.RefreshTokenRepo;
+import com.engly.engly_server.repository.RefreshTokenRepository;
 import com.engly.engly_server.security.jwt.JwtHolder;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
@@ -21,7 +21,7 @@ import java.time.temporal.ChronoUnit;
 @RequiredArgsConstructor
 public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
     private final JwtTokenGenerator jwtTokenGenerator;
-    private final RefreshTokenRepo refreshTokenRepo;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final AuthenticationManager authenticationManager;
 
     @Override
@@ -48,7 +48,7 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
 
     private void createRefreshToken(Users users, String refreshToken, HttpServletResponse httpServletResponse) {
         jwtTokenGenerator.createRefreshTokenCookie(httpServletResponse, refreshToken);
-        refreshTokenRepo.save(RefreshToken.builder()
+        refreshTokenRepository.save(RefreshToken.builder()
                 .user(users)
                 .refreshToken(refreshToken)
                 .createdAt(Instant.now())

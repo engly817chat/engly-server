@@ -1,14 +1,14 @@
-package com.engly.engly_server.repo;
+package com.engly.engly_server.repository;
 
 import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.enums.CategoryType;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-public interface RoomRepo extends JpaRepository<Rooms, String> {
-    Page<Rooms> findAllByCategory_Name(CategoryType name, Pageable pageable);
+import java.util.List;
+
+public interface RoomRepository extends JpaRepository<Rooms, String> {
+    List<Rooms> findAllByCategory_Name(CategoryType name);
 
     @Query(value = """
             SELECT r FROM Rooms r WHERE
@@ -17,5 +17,5 @@ public interface RoomRepo extends JpaRepository<Rooms, String> {
             LOWER(r.description) LIKE LOWER('%' || :keyString || '%')
             """
     )
-    Page<Rooms> findAllRoomsContainingKeyString(String keyString, Pageable pageable);
+    List<Rooms> findAllRoomsContainingKeyString(String keyString);
 }

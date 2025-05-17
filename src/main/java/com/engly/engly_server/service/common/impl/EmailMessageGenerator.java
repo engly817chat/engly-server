@@ -13,7 +13,6 @@ import java.util.Map;
 @Slf4j
 public class EmailMessageGenerator {
 
-
     public String generate(Map<String, Object> parameters, Resource resource) {
         String message;
         try {

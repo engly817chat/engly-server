@@ -5,9 +5,11 @@ import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.models.dto.create.RoomRequestDto;
 import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
 import com.engly.engly_server.service.common.RoomService;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -31,6 +33,7 @@ public class RoomController {
     @PostMapping("/create")
     @Operation(summary = "Create a new room", description = "Creates a new room with the specified category and details")
     @PreAuthorize("hasAuthority('SCOPE_CREATE_GLOBAL')")
+    @RateLimiter(name = "RoomController")
     public ResponseEntity<RoomsDto> createRoom(@RequestParam CategoryType name, @Valid @RequestBody RoomRequestDto roomRequestDto) {
         return new ResponseEntity<>(roomService.createRoom(name, roomRequestDto), HttpStatus.CREATED);
     }
@@ -70,8 +73,8 @@ public class RoomController {
             @ParameterObject  @PageableDefault(page = 0, size = 8,
                     sort = "name,asc") Pageable pageable,
             PagedResourcesAssembler<RoomsDto> assembler) {
-        var rooms = roomService.findAllRoomsByCategoryType(category, pageable);
-        return ResponseEntity.ok(assembler.toModel(rooms));
+        var rooms = roomService.findAllRoomsByCategoryType(category);
+        return ResponseEntity.ok(assembler.toModel(new PageImpl<>(rooms, pageable, rooms.size())));
     }
     @GetMapping("/find")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
@@ -89,14 +92,15 @@ public class RoomController {
             @ParameterObject  @PageableDefault(page = 0, size = 8,
                     sort = "name,asc") Pageable pageable,
             PagedResourcesAssembler<RoomsDto> assembler) {
-        var rooms = roomService.findAllRoomsContainingKeyString(keyString, pageable);
-        return ResponseEntity.ok(assembler.toModel(rooms));
+        final var rooms = roomService.findAllRoomsContainingKeyString(keyString);
+        return ResponseEntity.ok(assembler.toModel(new PageImpl<>(rooms, pageable, rooms.size())));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a room", description = "Deletes a room by its ID")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAuthority('SCOPE_DELETE_GLOBAL')")
+    @RateLimiter(name = "RoomController")
     public ResponseEntity<Void> deleteRoom(@PathVariable String id) {
         roomService.deleteRoomById(id);
         return ResponseEntity.noContent().build();
@@ -105,6 +109,7 @@ public class RoomController {
     @PutMapping("/{id}")
     @Operation(summary = "Update room details", description = "Partially updates room information")
     @PreAuthorize("hasAuthority('SCOPE_UPDATE_GLOBAL')")
+    @RateLimiter(name = "RoomController")
     public ResponseEntity<RoomsDto> updateRoom(
             @PathVariable String id,
             @Valid @RequestBody RoomUpdateRequest request) {

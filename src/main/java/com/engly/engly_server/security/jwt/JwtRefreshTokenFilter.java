@@ -1,7 +1,7 @@
 package com.engly.engly_server.security.jwt;
 
 import com.engly.engly_server.exception.ApiErrorResponse;
-import com.engly.engly_server.repo.RefreshTokenRepo;
+import com.engly.engly_server.repository.RefreshTokenRepository;
 import com.engly.engly_server.security.cookiemanagement.CookieUtils;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
 import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
@@ -33,12 +33,12 @@ import java.util.List;
 public class JwtRefreshTokenFilter extends OncePerRequestFilter {
     private final RSAKeyRecord rsaKeyRecord;
     private final JwtTokenUtils jwtTokenUtils;
-    private final RefreshTokenRepo refreshTokenRepo;
+    private final RefreshTokenRepository refreshTokenRepository;
 
-    public JwtRefreshTokenFilter(RSAKeyRecord rsaKeyRecord, JwtTokenUtils jwtTokenUtils, RefreshTokenRepo refreshTokenRepo) {
+    public JwtRefreshTokenFilter(RSAKeyRecord rsaKeyRecord, JwtTokenUtils jwtTokenUtils, RefreshTokenRepository refreshTokenRepository) {
         this.rsaKeyRecord = rsaKeyRecord;
         this.jwtTokenUtils = jwtTokenUtils;
-        this.refreshTokenRepo = refreshTokenRepo;
+        this.refreshTokenRepository = refreshTokenRepository;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
             final String userName = jwtTokenUtils.getUserName(jwtRefreshToken);
 
             if (!userName.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null) {
-                final var isRefreshTokenValidInDatabase = refreshTokenRepo.findByRefreshTokenAndRevokedIsFalse(jwtRefreshToken.getTokenValue())
+                final var isRefreshTokenValidInDatabase = refreshTokenRepository.findByRefreshTokenAndRevokedIsFalse(jwtRefreshToken.getTokenValue())
                         .orElse(null);
                 UserDetails userDetails = jwtTokenUtils.userDetails(userName);
                 if (jwtTokenUtils.isTokenValid(jwtRefreshToken, userDetails) && isRefreshTokenValidInDatabase != null) {

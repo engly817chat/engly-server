@@ -15,7 +15,7 @@ public enum Roles {
     ROLE_MANAGER(EnumSet.of(READ, WRITE, DELETE, AUTHORIZE, PASSWORD_RESET)),
     ROLE_USER(EnumSet.of(READ, WRITE, AUTHORIZE, PASSWORD_RESET)),
     ROLE_GOOGLE(EnumSet.of(ADDITIONAL_INFO, AUTHORIZE, PASSWORD_RESET, READ)),
-    ROLE_SYSADMIN(ROLE_ADMIN.permissions), // inherits from ROLE_ADMIN
+    ROLE_SYSADMIN(ROLE_ADMIN.permissions),
     ROLE_NOT_VERIFIED(EnumSet.of(NOT_VERIFIED, AUTHORIZE, PASSWORD_RESET));
 
     private final Set<Authority> permissions;

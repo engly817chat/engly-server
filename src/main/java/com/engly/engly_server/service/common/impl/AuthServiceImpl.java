@@ -6,11 +6,12 @@ import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.dto.create.SignInDto;
 import com.engly.engly_server.models.enums.*;
 import com.engly.engly_server.models.dto.create.SignUpRequestDto;
-import com.engly.engly_server.repo.RefreshTokenRepo;
-import com.engly.engly_server.repo.UserRepo;
+import com.engly.engly_server.repository.RefreshTokenRepository;
+import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
 import com.engly.engly_server.service.common.AuthService;
 import com.engly.engly_server.security.registration.RegistrationChooser;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ValidationException;
@@ -19,7 +20,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Service;
@@ -37,31 +37,32 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandler {
-    private final UserRepo userRepo;
+    private final UserRepository userRepository;
     private final JwtAuthenticationService jwtAuthenticationService;
-    private final RefreshTokenRepo refreshTokenRepo;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final Map<Provider, RegistrationChooser> chooserMap;
 
     @Value("${app.frontend.url}")
     private String frontendUrl;
 
-    public AuthServiceImpl(UserRepo userRepo, JwtAuthenticationService jwtAuthenticationService,
-                           RefreshTokenRepo refreshTokenRepo, List<RegistrationChooser> choosers) {
-        this.userRepo = userRepo;
+    public AuthServiceImpl(UserRepository userRepository, JwtAuthenticationService jwtAuthenticationService,
+                           RefreshTokenRepository refreshTokenRepository, List<RegistrationChooser> choosers) {
+        this.userRepository = userRepository;
         this.jwtAuthenticationService = jwtAuthenticationService;
-        this.refreshTokenRepo = refreshTokenRepo;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.chooserMap = choosers.stream()
                 .collect(Collectors.toMap(RegistrationChooser::getProvider, o -> o));
     }
 
     @Override
+    @RateLimiter(name = "AuthService")
     public AuthResponseDto getJwtTokensAfterAuthentication(SignInDto signInDto, HttpServletResponse response) {
         try {
             final var authentication = jwtAuthenticationService.authenticate(signInDto);
-            return userRepo.findByEmail(signInDto.email())
+            return userRepository.findByEmail(signInDto.email())
                     .map(users -> {
                         users.setLastLogin(Instant.now());
-                        final var savedUser = userRepo.save(users);
+                        final var savedUser = userRepository.save(users);
                         final var jwtHolder = jwtAuthenticationService.authenticateData(savedUser, authentication, response);
                         log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated", users.getUsername());
                         return AuthResponseDto.builder()
@@ -83,14 +84,15 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
 
 
     @Override
+    @RateLimiter(name = "AuthService")
     public AuthResponseDto getAccessTokenUsingRefreshToken(String refreshToken, HttpServletResponse response) {
         if (refreshToken == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid token format");
 
-        final var refreshTokenEntity = refreshTokenRepo.findByRefreshTokenAndRevokedIsFalse(refreshToken)
+        final var refreshTokenEntity = refreshTokenRepository.findByRefreshTokenAndRevokedIsFalse(refreshToken)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Refresh token revoked"));
         refreshTokenEntity.setRevoked(true);
-        final var users = refreshTokenRepo.save(refreshTokenEntity).getUser();
+        final var users = refreshTokenRepository.save(refreshTokenEntity).getUser();
 
         final var jwtHolder = jwtAuthenticationService.createAuthObject(users, response);
 
@@ -103,6 +105,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     }
 
     @Override
+    @RateLimiter(name = "AuthService")
     public AuthResponseDto registerUser(SignUpRequestDto signUpRequestDto, HttpServletResponse httpServletResponse) {
         try {
             final var user = chooserMap.get(Provider.LOCAL).registration(signUpRequestDto);
@@ -124,6 +127,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     }
 
     @Override
+    @RateLimiter(name = "AuthService")
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
         final var oauth2User = Optional.ofNullable(authentication.getPrincipal())
@@ -137,7 +141,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
         if (email == null || name == null || providerId == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid OAuth2 response");
 
-        final var user = userRepo.findByEmail(email)
+        final var user = userRepository.findByEmail(email)
                 .map(existingUser -> {
                     existingUser.setLastLogin(Instant.now());
                     return existingUser;

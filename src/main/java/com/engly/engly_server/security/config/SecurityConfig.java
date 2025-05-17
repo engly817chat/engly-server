@@ -1,6 +1,6 @@
 package com.engly.engly_server.security.config;
 
-import com.engly.engly_server.repo.RefreshTokenRepo;
+import com.engly.engly_server.repository.RefreshTokenRepository;
 import com.engly.engly_server.security.jwt.JwtAccessTokenFilter;
 import com.engly.engly_server.security.jwt.JwtRefreshTokenFilter;
 import com.engly.engly_server.security.jwt.JwtTokenUtils;
@@ -57,7 +57,7 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final RSAKeyRecord rsaKeyRecord;
     private final JwtTokenUtils jwtTokenUtils;
-    private final RefreshTokenRepo refreshTokenRepo;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final LogoutHandlerServiceImpl logoutHandlerServiceImpl;
 
     @Order(1)
@@ -131,7 +131,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JwtRefreshTokenFilter(rsaKeyRecord, jwtTokenUtils, refreshTokenRepo), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtRefreshTokenFilter(rsaKeyRecord, jwtTokenUtils, refreshTokenRepository), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> {
                     log.error("[SecurityConfig:refreshTokenSecurityFilterChain] Exception due to :{}", ex);
                     ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());

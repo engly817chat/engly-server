@@ -12,8 +12,7 @@ public record CookieUtils(Cookie[] cookies) {
     }
 
     public String getRefreshTokenCookie() {
-        if (cookies == null) return null;
-        return Arrays.stream(cookies)
+        return cookies == null ? null : Arrays.stream(cookies)
                 .filter(cookie -> "refreshToken".equals(cookie.getName()))
                 .findFirst()
                 .map(Cookie::getValue)
@@ -23,7 +22,7 @@ public record CookieUtils(Cookie[] cookies) {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        CookieUtils that = (CookieUtils) o;
+        final CookieUtils that = (CookieUtils) o;
         return Arrays.equals(cookies(), that.cookies());
     }
 

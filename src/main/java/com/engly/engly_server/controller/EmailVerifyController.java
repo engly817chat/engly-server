@@ -3,6 +3,7 @@ package com.engly.engly_server.controller;
 import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.dto.EmailSendInfo;
 import com.engly.engly_server.service.notification.EmailVerificationService;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,6 +39,7 @@ public class EmailVerifyController {
     )
     @PreAuthorize("hasAuthority('SCOPE_NOT_VERIFIED')")
     @PostMapping
+    @RateLimiter(name = "EmailVerifyController")
     public ResponseEntity<EmailSendInfo> notifyUserEmailVerify() {
         try {
             return new ResponseEntity<>(emailVerificationService.sendMessage(), HttpStatus.CREATED);

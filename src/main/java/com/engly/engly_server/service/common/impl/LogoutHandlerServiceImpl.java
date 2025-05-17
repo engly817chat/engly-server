@@ -2,7 +2,7 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.enums.TokenType;
-import com.engly.engly_server.repo.RefreshTokenRepo;
+import com.engly.engly_server.repository.RefreshTokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ import java.util.Objects;
 @Slf4j
 @RequiredArgsConstructor
 public class LogoutHandlerServiceImpl implements LogoutHandler {
-    private final RefreshTokenRepo refreshTokenRepo;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
@@ -28,10 +28,10 @@ public class LogoutHandlerServiceImpl implements LogoutHandler {
 
         final var refreshToken = Objects.requireNonNull(authHeader).substring(7);
 
-        refreshTokenRepo.findByRefreshTokenAndRevokedIsFalse(refreshToken)
+        refreshTokenRepository.findByRefreshTokenAndRevokedIsFalse(refreshToken)
                 .map(token -> {
                     token.setRevoked(true);
-                    return refreshTokenRepo.save(token);
+                    return refreshTokenRepository.save(token);
                 }).orElseThrow(() -> new NotFoundException("Refresh token not found"));
     }
 }

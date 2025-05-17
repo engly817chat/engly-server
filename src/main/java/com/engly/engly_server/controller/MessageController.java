@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -48,8 +49,8 @@ public class MessageController {
                                                                                             @ParameterObject @PageableDefault(page = 0, size = 8,
                                                                                                     sort = "createdDate,asc") Pageable pageable,
                                                                                             PagedResourcesAssembler<MessagesDto> assembler) {
-        var messages = messageService.findAllMessageInCurrentRoom(roomId, pageable);
-        return ResponseEntity.ok(assembler.toModel(messages));
+        final var messages = messageService.findAllMessageInCurrentRoom(roomId);
+        return ResponseEntity.ok(assembler.toModel(new PageImpl<>(messages, pageable, messages.size())));
     }
 
     @Operation(
@@ -73,8 +74,8 @@ public class MessageController {
                                                                                                     sort = "createdAt,asc") Pageable pageable,
                                                                                             @RequestParam String keyString,
                                                                                             PagedResourcesAssembler<MessagesDto> assembler) {
-        var messages = messageService.findAllMessagesContainingKeyString(roomId, keyString, pageable);
-        return ResponseEntity.ok(assembler.toModel(messages));
+        final var messages = messageService.findAllMessagesContainingKeyString(roomId, keyString);
+        return ResponseEntity.ok(assembler.toModel(new PageImpl<>(messages, pageable, messages.size())));
     }
 
 
@@ -82,6 +83,6 @@ public class MessageController {
     @PreAuthorize("hasAuthority('SCOPE_WRITE')")
     public ResponseEntity<String> deleteMessage(@PathVariable String id) {
         messageService.deleteMessage(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

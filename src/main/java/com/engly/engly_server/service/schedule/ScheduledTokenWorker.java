@@ -1,6 +1,6 @@
 package com.engly.engly_server.service.schedule;
 
-import com.engly.engly_server.repo.VerifyTokenRepo;
+import com.engly.engly_server.repository.VerifyTokenRepository;
 import com.engly.engly_server.service.common.EmailService;
 import com.engly.engly_server.service.common.impl.EmailMessageGenerator;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 public class ScheduledTokenWorker {
-    private final VerifyTokenRepo verifyTokenRepo;
+    private final VerifyTokenRepository verifyTokenRepository;
     private final EmailService emailService;
     private final EmailMessageGenerator messageGenerator;
     @Value("classpath:emailTemplates/verificationTemplate.txt")
@@ -25,13 +25,13 @@ public class ScheduledTokenWorker {
 
     @Scheduled(cron = "0 0 0 * * ?")
     private void deleteExpiredTokens() {
-        verifyTokenRepo.deleteAllByDeleteDateLessThanEqual(LocalDateTime.now());
+        verifyTokenRepository.deleteAllByDeleteDateLessThanEqual(LocalDateTime.now());
     }
 
     @Scheduled(cron = "0 0 0 * * ?")
     private void notificateAfter15days() {
         final var now = LocalDateTime.now();
-        final var toNotification = verifyTokenRepo.findAllByDeleteDateBetween(now.plusDays(15), now.plusDays(16));
+        final var toNotification = verifyTokenRepository.findAllByDeleteDateBetween(now.plusDays(15), now.plusDays(16));
         toNotification.forEach(verifyToken ->
                 emailService.sendEmail(verifyToken.getEmail(),
                         messageGenerator.generate(

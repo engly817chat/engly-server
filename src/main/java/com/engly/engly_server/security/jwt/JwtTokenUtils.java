@@ -1,6 +1,6 @@
 package com.engly.engly_server.security.jwt;
 
-import com.engly.engly_server.repo.UserRepo;
+import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,10 +12,10 @@ import java.util.Objects;
 
 @Component
 public class JwtTokenUtils {
-    private final UserRepo userRepo;
+    private final UserRepository userRepository;
 
-    public JwtTokenUtils(UserRepo userRepo) {
-        this.userRepo = userRepo;
+    public JwtTokenUtils(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     public String getUserName(Jwt jwtToken) {
@@ -32,7 +32,7 @@ public class JwtTokenUtils {
     }
 
     public UserDetails userDetails(String email) {
-        return userRepo.findByEmail(email)
+        return userRepository.findByEmail(email)
                 .map(UserDetailsImpl::new)
                 .orElseThrow(() -> new UsernameNotFoundException("UserEmail: " + email + " does not exist"));
     }

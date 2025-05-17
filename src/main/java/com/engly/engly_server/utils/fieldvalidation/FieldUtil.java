@@ -31,8 +31,4 @@ public final class FieldUtil {
     public static boolean isValid(Long duration) {
         return duration != null;
     }
-
-    public static boolean isValid(Object o) {
-        return o != null;
-    }
 }

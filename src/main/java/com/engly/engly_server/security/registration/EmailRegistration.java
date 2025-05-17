@@ -5,7 +5,7 @@ import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Provider;
 import com.engly.engly_server.models.dto.create.SignUpRequestDto;
-import com.engly.engly_server.repo.UserRepo;
+import com.engly.engly_server.repository.UserRepository;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ import java.time.Instant;
 @Slf4j
 @RequiredArgsConstructor
 public final class EmailRegistration implements RegistrationChooser {
-    private final UserRepo userRepo;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${dev.email}")
@@ -31,7 +31,7 @@ public final class EmailRegistration implements RegistrationChooser {
     public Users registration(SignUpRequestDto signUpRequestDto) {
         try {
             log.info("[AuthService:registerUser]User Registration Started with :::{}", signUpRequestDto);
-            userRepo.findByEmail(signUpRequestDto.email()).ifPresent(users -> {
+            userRepository.findByEmail(signUpRequestDto.email()).ifPresent(users -> {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User Already Exist");
             });
 
@@ -52,7 +52,7 @@ public final class EmailRegistration implements RegistrationChooser {
                     .lastLogin(Instant.now())
                     .build();
 
-            return userRepo.save(users);
+            return userRepository.save(users);
         } catch (ValidationException e) {
             log.error("[AuthService:registerUser]User Registration Failed: {}", e.getMessage());
             throw new FieldValidationException(e.getMessage());
