@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ..
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      # - SPRING_DATA_REDIS_PASSWORD=your_redis_password # if using password
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      - redis
+    restart: always
+
+  # Redis service
+  redis:
+    image: redis:7.0-alpine
+    ports:
+      - "6379:6379"
+    # Uncomment the following lines to use Redis with password
+    # command: redis-server --requirepass your_redis_password
+    volumes:
+      - redis-data:/data
+    restart: always
+
+volumes:
+  redis-data:
