@@ -3,7 +3,6 @@ package com.engly.engly_server.controller;
 import com.engly.engly_server.models.dto.UsersDto;
 import com.engly.engly_server.models.dto.update.ProfileUpdateRequest;
 import com.engly.engly_server.service.common.ProfileService;
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +24,7 @@ public class ProfileController {
 
     @PatchMapping("/update")
     @PreAuthorize("hasAuthority('SCOPE_WRITE')")
-    @RateLimiter(name = "ProfileController")
+//    @RateLimiter(name = "ProfileController")
     public ResponseEntity<UsersDto> updateProfile(@RequestBody ProfileUpdateRequest profileUpdateData) {
         return ResponseEntity.ok(profileService.updateProfile(profileUpdateData));
     }

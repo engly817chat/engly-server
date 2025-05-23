@@ -204,6 +204,18 @@ public class SecurityConfig {
 
     @Order(8)
     @Bean
+    public SecurityFilterChain eurekaClientSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        return httpSecurity
+                .securityMatcher(new AntPathRequestMatcher("/eureka/**"))
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .build();
+    }
+
+    @Order(9)
+    @Bean
     public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .securityMatcher(new AntPathRequestMatcher("/actuator/**"))
@@ -253,6 +265,7 @@ public class SecurityConfig {
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:3000",
                 "http://localhost:8000",
+                "http://localhost:8761",
                 "https://engly-chats.vercel.app",
                 "https://engly-client-blmg.vercel.app",
                 "https://equal-aardvark-java-service-74283cac.koyeb.app")

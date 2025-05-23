@@ -4,7 +4,6 @@ import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.dto.EmailSendInfo;
 import com.engly.engly_server.models.dto.update.PasswordResetRequest;
 import com.engly.engly_server.service.notification.PasswordResetService;
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -43,7 +42,7 @@ public class PasswordResetController {
             }
     )
     @PostMapping("/send")
-    @RateLimiter(name = "PasswordResetController")
+//    @RateLimiter(name = "PasswordResetController")
     public ResponseEntity<EmailSendInfo> notifyUserPasswordReset(@Valid
                                                                  @Email(message = "Isn't email")
                                                                  @NotBlank(message = "Email is blank")
@@ -72,7 +71,7 @@ public class PasswordResetController {
             }
     )
     @PostMapping
-    @RateLimiter(name = "PasswordResetController")
+//    @RateLimiter(name = "PasswordResetController")
     public ResponseEntity<AuthResponseDto> passwordReset(@Valid @RequestBody PasswordResetRequest data, HttpServletResponse response) {
         return new ResponseEntity<>(passwordResetService.passwordReset(data, response), HttpStatus.OK);
     }

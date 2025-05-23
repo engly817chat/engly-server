@@ -4,7 +4,6 @@ import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.dto.create.SignInDto;
 import com.engly.engly_server.models.dto.create.SignUpRequestDto;
 import com.engly.engly_server.service.common.AuthService;
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -60,7 +59,7 @@ public class AuthController {
             }
     )
     @PostMapping("/sign-in")
-    @RateLimiter(name = "AuthController")
+//    @RateLimiter(name = "AuthController")
     public ResponseEntity<AuthResponseDto> authenticateUser(@Valid @RequestBody SignInDto signInDto, HttpServletResponse response) {
         return new ResponseEntity<>(authService.getJwtTokensAfterAuthentication(signInDto, response), HttpStatus.OK);
     }
@@ -87,7 +86,7 @@ public class AuthController {
     )
     @PreAuthorize("hasAuthority('SCOPE_REFRESH_TOKEN')")
     @PostMapping("/refresh-token")
-    @RateLimiter(name = "AuthController")
+//    @RateLimiter(name = "AuthController")
     public ResponseEntity<Object> getAccessToken(
             @CookieValue(value = "refreshToken", required = false) String refreshTokenFromCookie,
             HttpServletResponse httpServletResponse) {
@@ -119,7 +118,7 @@ public class AuthController {
             }
     )
     @PostMapping("/sign-up")
-    @RateLimiter(name = "AuthController")
+//    @RateLimiter(name = "AuthController")
     public ResponseEntity<Object> registerUser(@Valid @RequestBody SignUpRequestDto signUpRequestDto,
                                                BindingResult bindingResult, HttpServletResponse httpServletResponse) {
 

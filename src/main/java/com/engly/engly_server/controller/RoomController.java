@@ -6,7 +6,6 @@ import com.engly.engly_server.models.dto.create.RoomRequestDto;
 import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
 import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.service.common.RoomService;
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
@@ -34,7 +33,7 @@ public class RoomController {
     @PostMapping("/create")
     @Operation(summary = "Create a new room", description = "Creates a new room with the specified category and details")
     @PreAuthorize("hasAuthority('SCOPE_CREATE_GLOBAL')")
-    @RateLimiter(name = "RoomController")
+//    @RateLimiter(name = "RoomController")
     public ResponseEntity<RoomsDto> createRoom(@RequestParam CategoryType name, @Valid @RequestBody RoomRequestDto roomRequestDto) {
         return new ResponseEntity<>(roomService.createRoom(name, roomRequestDto), HttpStatus.CREATED);
     }
@@ -89,7 +88,7 @@ public class RoomController {
                     id can be replaced by different fields in RoomsDto
                     \s"""
     )
-    @RateLimiter(name = "RoomController")
+//    @RateLimiter(name = "RoomController")
     public ResponseEntity<PagedModel<EntityModel<RoomsDto>>> findRoomsByCategoryAndKeyString(
             @PathVariable(value = "category") CategoryType category,
             @RequestParam(value = "keyString") String keyString,
@@ -111,7 +110,7 @@ public class RoomController {
                     id can be replaced by different fields in RoomsDto
                     \s"""
     )
-    @RateLimiter(name = "RoomController")
+//    @RateLimiter(name = "RoomController")
     public ResponseEntity<PagedModel<EntityModel<RoomsDto>>> findRoomsByKeyString(
             @RequestParam String keyString,
             @ParameterObject @PageableDefault(page = 0, size = 8,
@@ -124,7 +123,7 @@ public class RoomController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a room", description = "Deletes a room by its ID")
     @PreAuthorize("hasAuthority('SCOPE_DELETE_GLOBAL')")
-    @RateLimiter(name = "RoomController")
+//    @RateLimiter(name = "RoomController")
     public ResponseEntity<ApiResponse> deleteRoom(@PathVariable String id) {
         return ResponseEntity.ok(roomService.deleteRoomById(id));
     }
@@ -132,7 +131,7 @@ public class RoomController {
     @PutMapping("/{id}")
     @Operation(summary = "Update room details", description = "Partially updates room information")
     @PreAuthorize("hasAuthority('SCOPE_UPDATE_GLOBAL')")
-    @RateLimiter(name = "RoomController")
+//    @RateLimiter(name = "RoomController")
     public ResponseEntity<RoomsDto> updateRoom(
             @PathVariable String id,
             @Valid @RequestBody RoomUpdateRequest request) {
