@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.4.5</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <groupId>com.engly-prod</groupId>
+    <artifactId>engly</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>engly</name>
+    <description>Chat Project</description>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>engly-server</module>
+    </modules>
+
+    <properties>
+        <java.version>24</java.version>
+        <spring-cloud.version>2024.0.1</spring-cloud.version>
+        <org.apache.commons.version>3.17.0</org.apache.commons.version>
+        <flyway.version>11.8.2</flyway.version>
+        <ben-manes.caffeine.version>3.2.0</ben-manes.caffeine.version>
+        <mapstruct.version>1.6.3</mapstruct.version>
+        <postgresql.version>42.7.5</postgresql.version>
+        <springdoc.verion>2.8.8</springdoc.verion>
+        <resilience4j.version>2.3.0</resilience4j.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

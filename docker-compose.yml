@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  engly-eureka:
+    build:
+      context: .
+      dockerfile: engly-eureka/Dockerfile
+    ports:
+      - "8761:8761"
+    networks:
+      - engly-network
+
+  engly-server:
+    build:
+      context: .
+      dockerfile: engly-server/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    depends_on:
+      engly-eureka:
+        condition: service_healthy
+    networks:
+      - engly-network
+
+networks:
+  engly-network:
+    driver: bridge
