@@ -1,0 +1,5 @@
+# Ignore all target directories
+target/
+
+# Except for engly-server/target
+!engly-server/target/

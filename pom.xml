@@ -17,6 +17,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>engly-eureka</module>
         <module>engly-server</module>
     </modules>
 
