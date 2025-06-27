@@ -1,6 +1,7 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.MessagesDto;
+import com.engly.engly_server.models.dto.UsersDto;
 import com.engly.engly_server.service.common.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/message")
 @Tag(name = "08. Messages", description = "APIs for retrieving chat messages within a room.")
@@ -33,9 +36,9 @@ public class MessageController {
     @Operation(
             summary = "Get all messages in a room (paginated)",
             description = """
-                          Retrieves a paginated list of all messages within a specific chat room.
-                          The response is structured according to Spring HATEOAS `PagedModel`, including page metadata and navigation links.
-                          """
+                    Retrieves a paginated list of all messages within a specific chat room.
+                    The response is structured according to Spring HATEOAS `PagedModel`, including page metadata and navigation links.
+                    """
     )
     @ApiResponses({
             @ApiResponse(
@@ -58,10 +61,10 @@ public class MessageController {
     @Operation(
             summary = "Search for messages in a room (paginated)",
             description = """
-                          Retrieves a paginated list of messages within a specific room that contain a given search string.
-                          The search is typically case-insensitive.
-                          The response is also a `PagedModel`.
-                          """
+                    Retrieves a paginated list of messages within a specific room that contain a given search string.
+                    The search is typically case-insensitive.
+                    The response is also a `PagedModel`.
+                    """
     )
     @ApiResponses({
             @ApiResponse(
@@ -81,5 +84,26 @@ public class MessageController {
                                                                                             PagedResourcesAssembler<MessagesDto> assembler) {
         final var messages = messageService.findAllMessagesContainingKeyString(roomId, keyString, pageable);
         return ResponseEntity.ok(assembler.toModel(messages));
+    }
+
+    @Operation(
+            summary = "Retrieving a list of users who read message",
+            description = """
+                        roomId id of the room where to find
+                        page starts from 0 and more
+                        size is the amount of messages retrieves
+                        messageId is a id of message
+                        If the message doesn't exist it should return 409
+                    \s""",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Все виконано успішно"),
+                    @ApiResponse(responseCode = "409", description = "Повідомлення не існує")
+            }
+    )
+    @GetMapping("/find/users/who-read/{messageId}/by-message-id")
+    @PreAuthorize("hasAuthority('SCOPE_READ')")
+    public ResponseEntity<List<UsersDto>> findAllUsersWhoReadMessage(@PathVariable String messageId) {
+        final var users = messageService.findUsersWhoReadMessage(messageId);
+        return ResponseEntity.ok(users);
     }
 }
