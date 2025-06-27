@@ -80,7 +80,7 @@ public class MessageController {
     }
 
     @Operation(
-            summary = "Retrieving a list of messages that contains a KeyString",
+            summary = "Retrieving a list of users who read message",
             description = """
                         roomId id of the room where to find
                         page starts from 0 and more

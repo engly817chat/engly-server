@@ -98,6 +98,5 @@ public class MessageServiceImpl implements MessageService {
         } else {
             throw new NotFoundException("message not found %s".formatted(messageId));
         }
-
     }
 }
