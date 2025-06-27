@@ -1,6 +1,7 @@
 package com.engly.engly_server.service.common;
 
 import com.engly.engly_server.models.dto.MessagesDto;
+import com.engly.engly_server.models.dto.UsersDto;
 import com.engly.engly_server.models.dto.create.MessageRequestDto;
 
 import java.util.List;
@@ -15,4 +16,6 @@ public interface MessageService {
     List<MessagesDto> findAllMessageInCurrentRoom(String id);
 
     List<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString);
+
+    List<UsersDto> findUsersReadMessage(String messageId);
 }

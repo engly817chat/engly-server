@@ -2,9 +2,12 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.MessageMapper;
+import com.engly.engly_server.mapper.UserMapper;
 import com.engly.engly_server.models.dto.MessagesDto;
-import com.engly.engly_server.models.entity.Message;
+import com.engly.engly_server.models.dto.UsersDto;
 import com.engly.engly_server.models.dto.create.MessageRequestDto;
+import com.engly.engly_server.models.entity.ChatParticipants;
+import com.engly.engly_server.models.entity.Message;
 import com.engly.engly_server.repo.MessageRepo;
 import com.engly.engly_server.repo.RoomRepo;
 import com.engly.engly_server.repo.UserRepo;
@@ -78,5 +81,23 @@ public class MessageServiceImpl implements MessageService {
                 .stream()
                 .map(MessageMapper.INSTANCE::toMessageDto)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UsersDto> findUsersReadMessage(String messageId) {
+        final var byId = messageRepo.findById(messageId);
+        if (byId.isPresent()) {
+            final var message = byId.get();
+
+            return message.getRoom().getChatParticipants()
+                    .stream()
+                    .map(ChatParticipants::getUser)
+                    .filter(user -> user.getLastLogin().isAfter(message.getCreatedAt()))
+                    .map(UserMapper.INSTANCE::toUsersDto).toList();
+        } else {
+            throw new NotFoundException("message not found %s".formatted(messageId));
+        }
+
     }
 }

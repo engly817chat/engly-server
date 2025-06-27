@@ -1,6 +1,7 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.MessagesDto;
+import com.engly.engly_server.models.dto.UsersDto;
 import com.engly.engly_server.models.dto.create.MessageRequestDto;
 import com.engly.engly_server.service.common.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -75,6 +76,30 @@ public class MessageController {
                                                                                             @RequestParam String keyString,
                                                                                             PagedResourcesAssembler<MessagesDto> assembler) {
         final var messages = messageService.findAllMessagesContainingKeyString(roomId, keyString);
+        return ResponseEntity.ok(assembler.toModel(new PageImpl<>(messages, pageable, messages.size())));
+    }
+
+    @Operation(
+            summary = "Retrieving a list of messages that contains a KeyString",
+            description = """
+                        roomId id of the room where to find
+                        page starts from 0 and more
+                        size is the amount of messages retrieves
+                        messageId is a id of message
+                        If the message doesn't exist it should return 409
+                    \s""",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Все виконано успішно"),
+                    @ApiResponse(responseCode = "409", description = "Повідомлення не існує")
+            }
+    )
+    @GetMapping("/find/users/who-read/{messageId}/by-message-id")
+    @PreAuthorize("hasAuthority('SCOPE_READ')")
+    public ResponseEntity<PagedModel<EntityModel<UsersDto>>> findAllUsersWhoReadMessage(@PathVariable String messageId,
+                                                                                        @ParameterObject @PageableDefault(page = 0, size = 8,
+                                                                                                sort = "createdAt,asc") Pageable pageable,
+                                                                                        PagedResourcesAssembler<UsersDto> assembler) {
+        final var messages = messageService.findUsersReadMessage(messageId);
         return ResponseEntity.ok(assembler.toModel(new PageImpl<>(messages, pageable, messages.size())));
     }
 
