@@ -1,0 +1,384 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: engly-server
+  namespace: engly
+  labels:
+    app: engly-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: engly-server
+  template:
+    metadata:
+      labels:
+        app: engly-server
+    spec:
+      containers:
+      - name: engly-server
+        image: engly-server:latest  # Update with your actual image name and tag
+        ports:
+        - containerPort: 8000
+        env:
+        # Database configuration
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: engly-secrets
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: engly-secrets
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: engly-secrets
+              key: DB_PASSWORD
+
+        # Application URLs
+        - name: FRONTEND_URL
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: FRONTEND_URL
+        - name: BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: BASE_URL
+
+        # Google OAuth (from security.yml)
+        - name: CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: engly-secrets
+              key: CLIENT_ID
+        - name: CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: engly-secrets
+              key: CLIENT_SECRET
+
+        # Email configuration (from security.yml)
+        - name: ENGLY_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: engly-secrets
+              key: ENGLY_EMAIL
+        - name: ENGLY_EMAIL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: engly-secrets
+              key: ENGLY_EMAIL_PASSWORD
+
+        # Admin configuration (from application.properties)
+        - name: ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: engly-secrets
+              key: ADMIN_PASSWORD
+        - name: SYS_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: engly-secrets
+              key: SYS_EMAIL
+        - name: DEV_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: engly-secrets
+              key: DEV_EMAIL
+
+        # Google Drive configuration (from application.properties)
+        - name: GOOGLE_DRIVE_REFRESH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: engly-secrets
+              key: GOOGLE_DRIVE_REFRESH_TOKEN
+        - name: GOOGLE_DRIVE_FOLDER_ID
+          valueFrom:
+            secretKeyRef:
+              name: engly-secrets
+              key: GOOGLE_DRIVE_FOLDER_ID
+        - name: GOOGLE_DRIVE_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: engly-secrets
+              key: GOOGLE_DRIVE_CLIENT_ID
+        - name: GOOGLE_DRIVE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: engly-secrets
+              key: GOOGLE_DRIVE_CLIENT_SECRET
+
+        # JWT RSA Keys
+        - name: JWT_RSA_PRIVATE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: engly-secrets
+              key: JWT_RSA_PRIVATE_KEY
+        - name: JWT_RSA_PUBLIC_KEY
+          valueFrom:
+            secretKeyRef:
+              name: engly-secrets
+              key: JWT_RSA_PUBLIC_KEY
+
+        # File upload limits
+        - name: MAX_FILE_SIZE
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: MAX_FILE_SIZE
+
+        # Spring profiles and application configuration
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: SPRING_PROFILES_ACTIVE
+        - name: SPRING_APPLICATION_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: SPRING_APPLICATION_NAME
+
+        # Database URL override for Kubernetes
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:postgresql://postgres-service:5432/$(DB_NAME)?user=$(DB_USER)&password=$(DB_PASSWORD)"
+
+        # Server configuration from server.yml
+        - name: SERVER_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: SERVER_PORT
+        - name: SERVER_HTTP2_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: SERVER_HTTP2_ENABLED
+        - name: SERVER_COMPRESSION_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: SERVER_COMPRESSION_ENABLED
+
+        # HikariCP configuration from database.yml
+        - name: SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
+        - name: SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE
+
+        # Mail configuration from security.yml
+        - name: SPRING_MAIL_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: SPRING_MAIL_HOST
+        - name: SPRING_MAIL_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: SPRING_MAIL_PORT
+        - name: SPRING_MAIL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: engly-secrets
+              key: ENGLY_EMAIL
+        - name: SPRING_MAIL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: engly-secrets
+              key: ENGLY_EMAIL_PASSWORD
+
+        # JPA and Flyway configuration from database.yml
+        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        - name: SPRING_FLYWAY_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: SPRING_FLYWAY_ENABLED
+        - name: SPRING_FLYWAY_LOCATIONS
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: SPRING_FLYWAY_LOCATIONS
+
+        # Cache configuration from database.yml
+        - name: SPRING_CACHE_TYPE
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: SPRING_CACHE_TYPE
+
+        # Actuator configuration from monitoring.yml
+        - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+        - name: MANAGEMENT_ENDPOINTS_WEB_BASE_PATH
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: MANAGEMENT_ENDPOINTS_WEB_BASE_PATH
+        - name: MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED
+
+        # Prometheus metrics from monitoring.yml
+        - name: MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED
+
+        # Logging configuration from monitoring.yml
+        - name: LOGGING_LEVEL_ROOT
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: LOGGING_LEVEL_ROOT
+        - name: LOGGING_LEVEL_COM_ENGLY
+          valueFrom:
+            configMapKeyRef:
+              name: engly-config
+              key: LOGGING_LEVEL_COM_ENGLY
+
+        # Virtual threads support (from application-engly.yml)
+        - name: SPRING_THREADS_VIRTUAL_ENABLED
+          value: "true"
+
+        # Bean definition overriding (from application-engly.yml)
+        - name: SPRING_MAIN_ALLOW_BEAN_DEFINITION_OVERRIDING
+          value: "true"
+
+        # Probes configuration based on monitoring.yml actuator setup
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8000
+          initialDelaySeconds: 90
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        # Startup probe for slower application startup
+        startupProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+
+        # Resource configuration optimized for your Tomcat settings
+        resources:
+          requests:
+            memory: "768Mi"
+            cpu: "500m"
+          limits:
+            memory: "1536Mi"
+            cpu: "1500m"
+
+        # Volume mounts for certificates
+        volumeMounts:
+        - name: jwt-certs
+          mountPath: /app/certs
+          readOnly: true
+        - name: logs-volume
+          mountPath: /app/logs
+
+      # Volume for JWT certificates
+      volumes:
+      - name: jwt-certs
+        secret:
+          secretName: jwt-certs
+          items:
+          - key: privateKey.pem
+            path: privateKey.pem
+          - key: publicKey.pem
+            path: publicKey.pem
+      - name: logs-volume
+        emptyDir: {}
+
+      # Wait for PostgreSQL to be ready
+      initContainers:
+      - name: wait-for-postgres
+        image: postgres:15
+        command: ['sh', '-c', 'until pg_isready -h postgres-service -p 5432; do echo waiting for postgres; sleep 2; done;']
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: engly-service
+  namespace: engly
+  labels:
+    app: engly-server
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"
+    prometheus.io/path: "/actuator/prometheus"
+spec:
+  selector:
+    app: engly-server
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8000
+      targetPort: 8000
+    - name: actuator
+      protocol: TCP
+      port: 8080
+      targetPort: 8000
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: engly-service-external
+  namespace: engly
+  labels:
+    app: engly-server
+spec:
+  selector:
+    app: engly-server
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8000
+      targetPort: 8000
+      nodePort: 30000
+  type: NodePort
+

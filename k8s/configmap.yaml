@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: engly-config
+  namespace: engly
+data:
+  # Application URLs
+  FRONTEND_URL: "http://localhost:3000"  # Update with your frontend URL
+  BASE_URL: "http://engly-service:8000"  # Internal service URL for Kubernetes
+
+  # File upload limits
+  MAX_FILE_SIZE: "10MB"
+
+  # Spring profiles and application settings
+  SPRING_PROFILES_ACTIVE: "engly"
+  SPRING_APPLICATION_NAME: "engly-server"
+
+  # JWT Configuration
+  JWT_TOKEN_EXPIRY: "30"
+  EMAIL_NOTIFICATION_SUBJECT: "EngLy Email verification"
+
+  # Server Configuration
+  SERVER_PORT: "8000"
+  SERVER_HTTP2_ENABLED: "true"
+  SERVER_COMPRESSION_ENABLED: "true"
+
+  # Database Configuration
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: "org.postgresql.Driver"
+  SPRING_JPA_SHOW_SQL: "false"
+  SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
+  SPRING_FLYWAY_ENABLED: "true"
+  SPRING_FLYWAY_LOCATIONS: "classpath:db/migration"
+  SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+
+  # HikariCP Configuration
+  SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: "20"
+  SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: "5"
+  SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT: "30000"
+  SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT: "600000"
+  SPRING_DATASOURCE_HIKARI_MAX_LIFETIME: "1800000"
+
+  # Cache Configuration
+  SPRING_CACHE_TYPE: "caffeine"
+
+  # Mail Configuration
+  SPRING_MAIL_HOST: "smtp.gmail.com"
+  SPRING_MAIL_PORT: "587"
+  SPRING_MAIL_DEFAULT_ENCODING: "UTF-8"
+
+  # Actuator Configuration
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,prometheus,metrics,caches,loggers"
+  MANAGEMENT_ENDPOINTS_WEB_BASE_PATH: "/actuator"
+  MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "when_authorized"
+  MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED: "true"
+
+  # Metrics Configuration
+  MANAGEMENT_METRICS_DISTRIBUTION_PERCENTILES_HISTOGRAM_HTTP_SERVER_REQUESTS: "true"
+  MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED: "true"
+
+  # Resilience4j Rate Limiter Configuration
+  RESILIENCE4J_RATELIMITER_INSTANCES_AUTHCONTROLLER_LIMIT_FOR_PERIOD: "5"
+  RESILIENCE4J_RATELIMITER_INSTANCES_AUTHCONTROLLER_LIMIT_REFRESH_PERIOD: "15s"
+  RESILIENCE4J_RATELIMITER_INSTANCES_EMAILCONTROLLER_LIMIT_FOR_PERIOD: "4"
+  RESILIENCE4J_RATELIMITER_INSTANCES_EMAILCONTROLLER_LIMIT_REFRESH_PERIOD: "2m"
+
+  # Logging Configuration
+  LOGGING_LEVEL_ROOT: "INFO"
+  LOGGING_LEVEL_COM_ENGLY: "INFO"
+  LOGGING_PATTERN_CONSOLE: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+

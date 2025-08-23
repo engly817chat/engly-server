@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: engly
+  labels:
+    name: engly
+    app: engly-server
+
